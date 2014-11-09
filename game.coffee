@@ -8,6 +8,10 @@ class Player
         return "white"
 
 BASE_NEUTRAL_PLANETS = 5
+# States of the game:
+# 0: Initializing.
+# 1: Planning phase.
+# 2: Interactive phase
 
 class GameCls
     constructor:() ->
@@ -17,6 +21,8 @@ class GameCls
         @canvasHeight = window.innerHeight
         @bg = new Image()
         @bg.src = "bg.jpg"
+
+        @currentState = 0
 
         # List of all event handlers.
         # Other objects looking to add hooks to DOM events need
@@ -31,6 +37,7 @@ class GameCls
         @player = new Player(1, true)
 
         @generateDefaultPlanetSet()
+        @selectedPlanet = null
         @missiles = []
 
 
@@ -44,20 +51,19 @@ class GameCls
         @planets = [homePlanet]
 
         # Now generate the neutral planets
-        numPlanets = BASE_NEUTRAL_PLANETS#utilities.randInt(BASE_NEUTRAL_PLANETS, BASE_NEUTRAL_PLANETS+4)
+        numPlanets = utilities.randInt(BASE_NEUTRAL_PLANETS, BASE_NEUTRAL_PLANETS+6)
         i = 0
         while i < numPlanets
             planet = new Planet(0, 0, utilities.randInt(1, 3))
             planet.setLocation(planet.chooseRandomCoords()...)
             @planets.push(planet)
             i++
-            console.log("???")
     getContext:() ->
         return @ctx
 
     addEvents:() ->
         $(window).resize(@handleResize.bind(this))
-        # $(document).click(@handleClick.bind(this))
+        $(document).click(@handleClick.bind(this))
         # $(document).mousedown(@handleMouseDown.bind(this))
         # $(document).mouseup(@handleMouseUp.bind(this))
         # $(document).mousemove(@handleMouseMove.bind(this))
@@ -87,14 +93,21 @@ class GameCls
     #     @shooting = false
 
 
-    # handleClick:(e) ->
-        # @planets.push(new Planet( e.clientX, e.clientY, 10))
-        # [cx, cy] = utilities.getCenter()
-        # angle = utilities.getAngle(e.clientX, e.clientY, cx, cy)
-        # @missiles.push(new Missile(cx, cy, -angle, 5))
+    handleClick:(e) ->
+        selectedPlanet = null
+        for planet in @planets
+            if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
+                selectedPlanet = planet
+                break
+        if @selectedPlanet
+            @selectedPlanet.setSelected(false)
+            
+        if selectedPlanet != null
+            selectedPlanet.setSelected(true)
+            @selectedPlanet = selectedPlanet
 
-        # for handler in @eventHandlers["click"]
-        #     handler(e)
+        for handler in @eventHandlers["click"]
+            handler(e)
 
     addHandler:(eventName, func) ->
         @eventHandlers[eventName].push(func)

@@ -6,12 +6,23 @@ class Utilities
 	#   cy = center y
 	#   radius
 	#   color = valid css color (hex, word, etc)
-	drawCircle:(cx, cy, radius, color) ->
+	fillCircle:(cx, cy, radius, color) ->
+		@drawCircle(cx, cy, radius, color, false)
+
+	strokeCircle:(cx, cy, radius, color) ->
+		@drawCircle(cx, cy, radius, color, true)
+
+	drawCircle:(cx, cy, radius, color, stroke) ->
 		@ctx = Game.getContext()
-		@ctx.fillStyle = color;
 		@ctx.beginPath();
 		@ctx.arc(cx, cy, radius, 0, 2*Math.PI, false);
-		@ctx.fill();
+		if stroke
+			@ctx.strokeStyle = color
+			@ctx.stroke()
+		else
+			@ctx.fillStyle = color;
+			@ctx.fill();
+
 
 	getCenter:() ->
 		return [window.innerWidth/2, window.innerHeight/2]

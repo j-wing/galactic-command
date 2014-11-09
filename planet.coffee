@@ -1,4 +1,5 @@
 DEFAULT_PLANET_COLOR = "white"
+SELECTED_COLOR = "yellow"
 PLANET_SIZES = 
     1: 15
     2: 25
@@ -13,15 +14,19 @@ class Planet
         @ctx = Game.getContext()
         @numShips = @chooseDefaultShips()
         @killRate = @chooseDefaultKillRate()
-        # @img = new Image()
-        # @img.src = "mars.jpg"
+        @selected = false
 
 
     render:() ->
         @ctx.shadowBlur = 100
         @ctx.shadowColor = @getColor()
-        utilities.drawCircle(@x, @y, @radius, @getColor())
-        # @ctx.drawImage(@img, @x, @y, @radius*2, @radius*2)
+        utilities.fillCircle(@x, @y, @radius, @getColor())
+        if @selected
+            # @ctx.stroke
+            @ctx.shadowBlur = 100
+            @ctx.shadowColor = SELECTED_COLOR
+            utilities.strokeCircle(@x, @y, @radius+4, SELECTED_COLOR)
+
 
     getColor:() ->
         if @owner != null
@@ -47,6 +52,9 @@ class Planet
         @x = x
         @y = y
 
+    setSelected:(selected) ->
+        @selected = selected
+
     chooseRandomCoords:(checkCollisions) ->
         # Returns random x, y for this planet such that the whole planet is at least 20 units from an edge and any other planet
         while true
@@ -64,4 +72,5 @@ class Planet
             if !collided
                 break
         return [x, y]
+
 window.Planet = Planet
