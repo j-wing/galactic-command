@@ -21,7 +21,7 @@ class Game
         @handleResize()
 
         @planets = [new Planet(@, getCenter()..., 50)]
-        @missiles = []
+        @missiles = [new Missile(@, 0, 200, 0, 2)]
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
@@ -75,6 +75,9 @@ class Game
                 @ctx.lineTo(planet.x, planet.y)
                 @ctx.strokeStyle = "white"
                 @ctx.stroke();
+
+        for missile in @missiles
+            missile.render()
 
         window.requestAnimationFrame(@renderLoop.bind(this))
 
