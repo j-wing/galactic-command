@@ -26,4 +26,11 @@ class Utilities
 			angle += Math.PI
 		return angle
 
+	drawPolygon:(color, pts...) ->
+		ctx.fillStyle = color
+		ctx.beginPath()
+		for pt in pts
+			ctx.lineTo(pt...)
+		ctx.fill();
+
 window.utilities = new Utilities()
