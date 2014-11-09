@@ -4,8 +4,7 @@ class Projectile
 	#	x,y = current x, y position
 	#	angle = direction of motion, in radians
 	#	speed = distance object moves in one frame
-	constructor:(@game, @x, @y, @angle, @speed) ->
-		@ctx = @game.getContext()
+	constructor:(@x, @y, @angle, @speed) ->
 
 	getNextCoords:() ->
 		x = @x + Math.cos(@angle)*@speed
@@ -13,8 +12,8 @@ class Projectile
 		return [x, y]
 
 class Missile extends Projectile
-	constructor:(@game, @x, @y, @angle, @speed) ->
-		super(@game, @x, @y, -@angle, @speed)
+	constructor:(@x, @y, @angle, @speed) ->
+		super(@x, @y, -@angle, @speed)
 		@height = 8
 		@width = 2
 		@color = "white"
@@ -36,6 +35,24 @@ class Missile extends Projectile
 			   pt4[1] + Math.sin(angle3)*@height]
 
 		utilities.drawPolygon(@color, pt1, pt2, pt3, pt4)
+
+class Ship extends Projectile
+	constructor:(@x, @y, @angle, @speed, @planetFrom, @owner) ->
+		super(@x, @y, -@angle, @speed)
+		@size = 3
+		@power = 5
+		@color = "white"
+
+	render:() ->
+		[@x, @y] = @getNextCoords()
+		halfSize = @size / 2
+		angle1 = 180 + @angle
+		pt1 = [@x + Math.cos(angle1)*@size,
+			   @y + Math.sin(angle1)*@size]
+		angle2 = 90 + @angle
+		pt2 = [pt1[0] + Math.cos(angle2)*halfSize,
+			   pt1[1] + Math.sin(angle2)*halfSize]
+
 
 
 window.Projectile = Projectile

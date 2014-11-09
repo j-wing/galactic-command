@@ -1,10 +1,10 @@
 class Player
     constructor:(@number, @isHuman) ->
 
-class Game
+class GameCls
     constructor:() ->
         @canvas = $("canvas")
-        window.ctx = @canvas[0].getContext("2d")
+        @ctx = @canvas[0].getContext("2d")
         @canvasWidth = window.innerWidth
         @canvasHeight = window.innerHeight
 
@@ -17,14 +17,16 @@ class Game
         # Set the canvas width/height
         @handleResize()
 
-        @planets = [new Planet(@, utilities.getCenter()..., 50)]
+    startRenderLoop:() ->
+
+        @planets = [new Planet(utilities.getCenter()..., 50)]
         @missiles = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
 
     getContext:() ->
-        return ctx
+        return @ctx
 
     addEvents:() ->
         $(window).resize(@handleResize.bind(this))
@@ -37,10 +39,10 @@ class Game
         if (@shooting)
             wiggle_room = [-5,-4,-3,-2,-1,0,1,2,3,4,5]
             [cx, cy] = utilities.getCenter()
-            cx += wiggle_room[Math.floor(Math.random()*10)]
-            cy += wiggle_room[Math.floor(Math.random()*10)]
+            cx += wiggle_room[Math.round(Math.random()*10)]
+            cy += wiggle_room[Math.round(Math.random()*10)]
             angle = utilities.getAngle(@cursorPosition..., cx, cy)
-            @missiles.push(new Missile(@, cx, cy, -angle, 5))
+            @missiles.push(new Missile(cx, cy, -angle, 5))
             setTimeout((() =>
                 @shootContinuously()
             ), 100)
@@ -59,10 +61,10 @@ class Game
 
 
     handleClick:(e) ->
-        @planets.push(new Planet(@, e.clientX, e.clientY, 10))
+        @planets.push(new Planet( e.clientX, e.clientY, 10))
         [cx, cy] = utilities.getCenter()
         angle = utilities.getAngle(e.clientX, e.clientY, cx, cy)
-        @missiles.push(new Missile(@, cx, cy, -angle, 5))
+        @missiles.push(new Missile(cx, cy, -angle, 5))
 
         for handler in @eventHandlers["click"]
             handler(e)
@@ -76,11 +78,11 @@ class Game
         @canvas.attr("width", @canvasWidth).attr("height", @canvasHeight)
 
     renderLoop:() ->
-        ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
+        @ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
 
         # Fill default background
-        ctx.fillStyle = "black"
-        ctx.fillRect(0, 0, @canvasWidth, @canvasHeight)
+        @ctx.fillStyle = "black"
+        @ctx.fillRect(0, 0, @canvasWidth, @canvasHeight)
 
         for planet in @planets
             planet.render()
@@ -107,5 +109,6 @@ class Game
         window.requestAnimationFrame(@renderLoop.bind(this))
 
 $(document).ready(() ->
-    window.Game = new Game()
+    window.Game = new GameCls()
+    Game.startRenderLoop()
 )

@@ -7,10 +7,11 @@ class Utilities
 	#   radius
 	#   color = valid css color (hex, word, etc)
 	drawCircle:(cx, cy, radius, color) ->
-		ctx.fillStyle = color;
-		ctx.beginPath();
-		ctx.arc(cx, cy, radius, 0, 2*Math.PI, false);
-		ctx.fill();
+		@ctx = Game.getContext()
+		@ctx.fillStyle = color;
+		@ctx.beginPath();
+		@ctx.arc(cx, cy, radius, 0, 2*Math.PI, false);
+		@ctx.fill();
 
 	getCenter:() ->
 		return [window.innerWidth/2, window.innerHeight/2]
@@ -27,10 +28,10 @@ class Utilities
 		return angle
 
 	drawPolygon:(color, pts...) ->
-		ctx.fillStyle = color
-		ctx.beginPath()
+		@ctx.fillStyle = color
+		@ctx.beginPath()
 		for pt in pts
-			ctx.lineTo(pt...)
-		ctx.fill();
+			@ctx.lineTo(pt...)
+		@ctx.fill();
 
 window.utilities = new Utilities()
