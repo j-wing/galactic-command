@@ -21,6 +21,7 @@ class GameCls
 
         @planets = [new Planet(utilities.getCenter()..., 50)]
         @missiles = []
+        @fleets = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
@@ -42,7 +43,7 @@ class GameCls
             cx += wiggle_room[Math.round(Math.random()*10)]
             cy += wiggle_room[Math.round(Math.random()*10)]
             angle = utilities.getAngle(@cursorPosition..., cx, cy)
-            @missiles.push(new Missile(cx, cy, -angle, 5))
+            @missiles.push(new Ship(cx, cy, -angle, 5, 0, null))
             setTimeout((() =>
                 @shootContinuously()
             ), 100)
@@ -52,9 +53,9 @@ class GameCls
 
     handleMouseDown: (e) ->
         @shooting = true
-        setTimeout((() =>
-            @shootContinuously(e)
-        ), 100)
+        # setTimeout((() =>
+        #     @shootContinuously(e)
+        # ), 100)
 
     handleMouseUp:(e) ->
         @shooting = false
@@ -64,7 +65,9 @@ class GameCls
         @planets.push(new Planet( e.clientX, e.clientY, 10))
         [cx, cy] = utilities.getCenter()
         angle = utilities.getAngle(e.clientX, e.clientY, cx, cy)
-        @missiles.push(new Missile(cx, cy, -angle, 5))
+        @fleets.push(new Fleet(@planets[0], @planets[@planets.length - 1], 50))
+
+        console.log(@fleets[0])
 
         for handler in @eventHandlers["click"]
             handler(e)
@@ -105,6 +108,15 @@ class GameCls
             else
                 missile.render()
             mi++
+
+        fi = 0
+        while fi < @fleets.length
+            fleet = @fleets[fi]
+            if !fleet.hasCollided()
+                fleet.render()
+            else
+                @fleets.splice(fi, 1)
+            fi++
 
         window.requestAnimationFrame(@renderLoop.bind(this))
 

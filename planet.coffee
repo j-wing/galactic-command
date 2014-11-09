@@ -2,10 +2,10 @@ DEFAULT_PLANET_COLOR = "white"
 
 class Planet
     # Base class for planets
-    constructor:(@game, @x, @y, @radius) ->
+    constructor:(@x, @y, @radius) ->
         # alert("odded" + this.x + " " + this.y)
         @owner = null
-        @ctx = @game.getContext()
+        @ctx = Game.getContext()
 
     render:() ->
         utilities.drawCircle(@x, @y, @radius, @getColor())
