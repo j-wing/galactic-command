@@ -13,12 +13,10 @@ class Projectile
 		return [x, y]
 
 class Missile extends Projectile
-	constructor:(@game, @x, @y, @angle, @speed) ->
+	constructor:(@game, @x, @y, @angle, @speed, @color) ->
 		super(@game, @x, @y, -@angle, @speed)
 		@height = 8
 		@width = 2
-		@color = "white"
-
 
 	render:() ->
 		[@x, @y] = @getNextCoords()
@@ -43,6 +41,7 @@ class Missile extends Projectile
 		@ctx.lineTo(pt3...);
 		@ctx.lineTo(pt4...);
 		@ctx.fill();
+
 
 window.Projectile = Projectile
 window.Missile = Missile

@@ -8,7 +8,7 @@ class Planet
         @ctx = @game.getContext()
 
     render:() ->
-        @game.drawCircle(@x, @y, @radius, @getColor())
+        utilities.drawCircle(@x, @y, @radius, @getColor())
 
     getColor:() ->
         if @owner != null

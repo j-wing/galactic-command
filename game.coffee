@@ -1,14 +1,10 @@
 class Player
     constructor:(@number, @isHuman) ->
 
-window.getCenter = () ->
-    return [window.innerWidth/2, window.innerHeight/2]
-window.euclidean_distance = (x1, y1, x2, y2) ->
-    return Math.sqrt(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2))
 class Game
     constructor:() ->
         @canvas = $("canvas")
-        @ctx = @canvas[0].getContext("2d")
+        window.ctx = @canvas[0].getContext("2d")
         @canvasWidth = window.innerWidth
         @canvasHeight = window.innerHeight
 
@@ -21,27 +17,51 @@ class Game
         # Set the canvas width/height
         @handleResize()
 
-        @planets = [new Planet(@, getCenter()..., 50)]
+        @planets = [new Planet(@, utilities.getCenter()..., 50)]
         @missiles = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
 
     getContext:() ->
-        return @ctx
+        return ctx
 
     addEvents:() ->
         $(window).resize(@handleResize.bind(this))
         $(document).click(@handleClick.bind(this))
+        $(document).mousedown(@handleMouseDown.bind(this))
+        $(document).mouseup(@handleMouseUp.bind(this))
+        $(document).mousemove(@handleMouseMove.bind(this))
+
+    shootContinuously: () ->
+        if (@shooting)
+            wiggle_room = [-5,-4,-3,-2,-1,0,1,2,3,4,5]
+            [cx, cy] = utilities.getCenter()
+            cx += wiggle_room[Math.floor(Math.random()*10)]
+            cy += wiggle_room[Math.floor(Math.random()*10)]
+            angle = utilities.getAngle(@cursorPosition..., cx, cy)
+            @missiles.push(new Missile(@, cx, cy, -angle, 5))
+            setTimeout((() =>
+                @shootContinuously()
+            ), 100)
+
+    handleMouseMove: (e) ->
+        @cursorPosition = [e.clientX, e.clientY]
+
+    handleMouseDown: (e) ->
+        @shooting = true
+        setTimeout((() =>
+            @shootContinuously(e)
+        ), 100)
+
+    handleMouseUp:(e) ->
+        @shooting = false
+
 
     handleClick:(e) ->
         @planets.push(new Planet(@, e.clientX, e.clientY, 10))
-        [cx, cy] = getCenter()
-        xdiff = e.clientX - cx
-        ydiff = e.clientY - cy
-        angle = Math.atan(ydiff/xdiff)
-        if xdiff < 0
-            angle += Math.PI
+        [cx, cy] = utilities.getCenter()
+        angle = utilities.getAngle(e.clientX, e.clientY, cx, cy)
         @missiles.push(new Missile(@, cx, cy, -angle, 5))
 
         for handler in @eventHandlers["click"]
@@ -55,25 +75,12 @@ class Game
         @canvasHeight = window.innerHeight
         @canvas.attr("width", @canvasWidth).attr("height", @canvasHeight)
 
-
-    # Draws a circle to the canvas
-    # @params:
-    #   cx = center x
-    #   cy = center y
-    #   radius
-    #   color = valid css color (hex, word, etc)
-    drawCircle:(cx, cy, radius, color) ->
-        @ctx.fillStyle = color;
-        @ctx.beginPath();
-        @ctx.arc(cx, cy, radius, 0, 2*Math.PI, false);
-        @ctx.fill();
-
     renderLoop:() ->
-        @ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
+        ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
 
         # Fill default background
-        @ctx.fillStyle = "black"
-        @ctx.fillRect(0, 0, @canvasWidth, @canvasHeight)
+        ctx.fillStyle = "black"
+        ctx.fillRect(0, 0, @canvasWidth, @canvasHeight)
 
         for planet in @planets
             planet.render()
@@ -85,7 +92,8 @@ class Game
             collided = false
             while pi < @planets.length
                 planet = @planets[pi]
-                if euclidean_distance(missile.x, missile.y, planet.x, planet.y) < planet.radius and planet != @planets[0]
+                # Collision detection for missiles and planets
+                if utilities.euclideanDistance(missile.x, missile.y, planet.x, planet.y) < planet.radius and planet != @planets[0]
                     @planets.splice(pi, 1)
                     collided = true
                     break
