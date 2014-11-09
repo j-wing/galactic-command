@@ -51,4 +51,10 @@ class Utilities
 			low = 0
 		return low + Math.round(Math.random() * (high - low))
 
+	randDouble: (low, high) ->
+		if !high?
+			high = low
+			low = 0
+		return low + Math.random() * (high - low)
+
 window.utilities = new Utilities()

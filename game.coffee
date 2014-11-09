@@ -39,6 +39,7 @@ class GameCls
         @generateDefaultPlanetSet()
         @selectedPlanet = null
         @missiles = []
+        @fleets = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
@@ -141,6 +142,15 @@ class GameCls
             else
                 missile.render()
             mi++
+
+        fi = 0
+        while fi < @fleets.length
+            fleet = @fleets[fi]
+            if !fleet.hasCollided()
+                fleet.render()
+            else
+                @fleets.splice(fi, 1)
+            fi++
 
         window.requestAnimationFrame(@renderLoop.bind(this))
 
