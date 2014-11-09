@@ -93,6 +93,8 @@ class GameCls
 
     handleMouseMove: (e) ->
         hoverPlanet = @mouseOnPlanet(e)
+        if hoverPlanet
+            InfoBox.draw(hoverPlanet)
 
     # handleMouseUp:(e) ->
     #     @shooting = false
@@ -116,14 +118,14 @@ class GameCls
             if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
                 return planet
         return null
-# 
+#
     handleClick:(e) ->
         selectedPlanet = @mouseOnPlanet(e)
 
         if selectedPlanet == null
             @setSource(null)
             @setDestination(null)
-        
+
         else
             if @selectedSource
                 @setDestination(selectedPlanet)

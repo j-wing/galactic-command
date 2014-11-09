@@ -23,6 +23,14 @@ class Utilities
 			@ctx.fillStyle = color;
 			@ctx.fill();
 
+	drawLine: (color, tx, ty, fx, fy)->
+		@ctx.strokeStyle = color
+		@ctx.lineWidth = 1
+		@ctx.beginPath()
+		@ctx.moveTo(tx, ty)
+		@ctx.lineTo(fx, fy)
+		@ctx.stroke()
+
 
 	getCenter:() ->
 		return [window.innerWidth/2, window.innerHeight/2]
