@@ -30,3 +30,16 @@ class Game
         @ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
 
         window.requestAnimationFrame(@renderLoop.bind(this))
+
+
+    # Draws a circle to the canvas
+    # @params:
+    #   cx = center x
+    #   cy = center y
+    #   radius
+    #   color = valid css color (hex, word, etc)
+    drawCircle:(cx, cy, radius, color) ->
+        @ctx.fillStyle = color;
+        @ctx.beginPath();
+        @ctx.arc(cx, cy, radius, 0, 2*pi, false);
+        @ctx.fill();
