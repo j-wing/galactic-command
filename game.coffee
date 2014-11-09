@@ -3,7 +3,8 @@ class Player
 
 window.getCenter = () ->
     return [window.innerWidth/2, window.innerHeight/2]
-
+window.euclidean_distance = (x1, y1, x2, y2) ->
+    return Math.sqrt(Math.pow(x2-x1, 2)+Math.pow(y2-y1, 2))
 class Game
     constructor:() ->
         @canvas = $("canvas")
@@ -21,7 +22,7 @@ class Game
         @handleResize()
 
         @planets = [new Planet(@, getCenter()..., 50)]
-        @missiles = [new Missile(@, 0, 200, 0, 2)]
+        @missiles = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
@@ -35,6 +36,13 @@ class Game
 
     handleClick:(e) ->
         @planets.push(new Planet(@, e.clientX, e.clientY, 10))
+        [cx, cy] = getCenter()
+        xdiff = e.clientX - cx
+        ydiff = e.clientY - cy
+        angle = Math.atan(ydiff/xdiff)
+        if xdiff < 0
+            angle += Math.PI
+        @missiles.push(new Missile(@, cx, cy, -angle, 5))
 
         for handler in @eventHandlers["click"]
             handler(e)
@@ -69,15 +77,24 @@ class Game
 
         for planet in @planets
             planet.render()
-            if planet != @planets[0]
-                @ctx.beginPath()
-                @ctx.moveTo(@planets[0].x, @planets[0].y)
-                @ctx.lineTo(planet.x, planet.y)
-                @ctx.strokeStyle = "white"
-                @ctx.stroke();
 
-        for missile in @missiles
-            missile.render()
+        mi = 0
+        while mi < @missiles.length
+            missile = @missiles[mi]
+            pi = 0
+            collided = false
+            while pi < @planets.length
+                planet = @planets[pi]
+                if euclidean_distance(missile.x, missile.y, planet.x, planet.y) < planet.radius and planet != @planets[0]
+                    @planets.splice(pi, 1)
+                    collided = true
+                    break
+                pi++
+            if collided
+                @missiles.splice(mi, 1)
+            else
+                missile.render()
+            mi++
 
         window.requestAnimationFrame(@renderLoop.bind(this))
 
