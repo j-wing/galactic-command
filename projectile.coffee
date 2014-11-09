@@ -63,7 +63,7 @@ class Fleet
 	constructor:(@planetFrom, @planetTo, @numShips, @speed) ->
 		@ships = []
 		@owner = @planetFrom.owner
-		radius = @numShips / 2
+		radius = @numShips*4
 		i = 0
 		angle = utilities.getAngle(@planetTo.x, @planetTo.y, @planetFrom.x, @planetFrom.y)
 		@ships.push(new Ship(@planetFrom.x, @planetFrom.y, -angle, 5, @planetFrom, @planetFrom.owner))

@@ -83,6 +83,11 @@ class Planet
             if remainingShips > 0
                 @owner = fleet.owner
                 @numShips = remainingShips
+            else
+                @numShips = Math.abs(remainingShips)
+
+    sendShips:(num) ->
+        @numShips -= num
 
 
 window.Planet = Planet
