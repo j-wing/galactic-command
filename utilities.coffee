@@ -34,4 +34,10 @@ class Utilities
 			@ctx.lineTo(pt...)
 		@ctx.fill();
 
+	randInt:(low, high) ->
+		if !high?
+			high = low
+			low = 0
+		return low + Math.round(Math.random() * (high - low))
+
 window.utilities = new Utilities()
