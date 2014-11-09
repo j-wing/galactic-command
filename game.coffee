@@ -95,6 +95,8 @@ class GameCls
         hoverPlanet = @mouseOnPlanet(e)
         if hoverPlanet
             InfoBox.draw(hoverPlanet)
+        else
+            InfoBox.hide()
 
     # handleMouseUp:(e) ->
     #     @shooting = false

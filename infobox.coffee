@@ -12,7 +12,8 @@ class InfoBox
 		# 			   @planet.y - @planet.radius]
 		$("#info-box").css({
 			"top":"" + (topLeft[1]) + "px",
-			"left":"" + (topLeft[0]) + "px"
+			"left":"" + (topLeft[0]) + "px",
+			"display":"block"
 		});
 
 		# Set owner text
@@ -30,5 +31,8 @@ class InfoBox
 
 		# Set kill rate
 		$("#power").html(@planet.killRate.toFixed(2))
+
+	hide:() ->
+		$("#info-box").css("display","none")
 
 window.InfoBox = new InfoBox()
