@@ -138,7 +138,10 @@ class GameCls
             handler(e)
 
     deployFleet:() ->
-        @fleets.push(new Fleet(@selectedSource, @selectedDestination, 100, 5))
+        if @selectedSource.numShips > 0
+            shipsToSend = Math.floor(@selectedSource.numShips/2)
+            @fleets.push(new Fleet(@selectedSource, @selectedDestination, shipsToSend, 5))
+            @selectedSource.sendShips(shipsToSend)
         @setSource(null)
         @setDestination(null)
 
