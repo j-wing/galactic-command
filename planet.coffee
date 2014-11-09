@@ -79,12 +79,14 @@ class Planet
             # Reinforcements
             @numShips += fleet.numShips
         else
-            remainingShips = fleet.numShips * fleet.planetFrom.killRate - @numShips*@killRate
+            attackerRand = utilities.randDouble(.8, 1.2)
+            defenderRand = utilities.randDouble(.8, 1.2)
+            remainingShips = Math.round(fleet.numShips * fleet.planetFrom.killRate * attackerRand - @numShips*@killRate*defenderRand)
             if remainingShips > 0
                 @owner = fleet.owner
-                @numShips = remainingShips
+                @numShips = Math.round(remainingShips / fleet.planetFrom.killRate)
             else
-                @numShips = Math.abs(remainingShips)
+                @numShips = Math.round(Math.abs(remainingShips) /@killRate)
 
     sendShips:(num) ->
         @numShips -= num
