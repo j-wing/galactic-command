@@ -41,7 +41,7 @@ class Ship extends Projectile
 		super(@x, @y, -@angle, @speed)
 		@size = 12
 		@power = 5
-		@color = "white"
+		@color = @owner.getShipColor()
 
 	render:() ->
 		[@x, @y] = @getNextCoords()
@@ -61,13 +61,13 @@ class Ship extends Projectile
 
 class Fleet
 	constructor:(@planetFrom, @planetTo, @numShips, @speed) ->
-		console.log("created new fleet")
 		@ships = []
+		@owner = @planetFrom.owner
 		radius = @numShips / 2
 		i = 0
 		angle = utilities.getAngle(@planetTo.x, @planetTo.y, @planetFrom.x, @planetFrom.y)
 		@ships.push(new Ship(@planetFrom.x, @planetFrom.y, -angle, 5, @planetFrom, @planetFrom.owner))
-		console.log(@planetFrom.x, @planetFrom.y)
+
 		while i < @numShips
 			spawnRadius = utilities.randInt(0, radius)
 			spawnAngle = utilities.randDouble(0, Math.PI*2)

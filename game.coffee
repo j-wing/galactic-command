@@ -37,7 +37,8 @@ class GameCls
         @player = new Player(1, true)
 
         @generateDefaultPlanetSet()
-        @selectedPlanet = null
+        @selectedSource = null
+        @selectedDestination = null
         @missiles = []
         @fleets = []
 
@@ -57,8 +58,14 @@ class GameCls
         while i < numPlanets
             planet = new Planet(0, 0, utilities.randInt(1, 3))
             planet.setLocation(planet.chooseRandomCoords()...)
+
+            # FOR DEBUGGING
+            if Math.round(Math.random()) == 0
+                planet.setOwner(@player)
+
             @planets.push(planet)
             i++
+
     getContext:() ->
         return @ctx
 
@@ -93,6 +100,20 @@ class GameCls
     # handleMouseUp:(e) ->
     #     @shooting = false
 
+    setSource:(planet) ->
+        if @selectedSource
+            @selectedSource.setSelected(false)
+        if planet
+            planet.setSelected(true)
+        @selectedSource = planet
+
+    setDestination:(planet) ->
+        if @selectedDestination
+            @selectedDestination.setSelected(false)
+        if planet
+            planet.setSelected(true)
+        @selectedDestination = planet
+
 
     handleClick:(e) ->
         selectedPlanet = null
@@ -100,15 +121,26 @@ class GameCls
             if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
                 selectedPlanet = planet
                 break
-        if @selectedPlanet
-            @selectedPlanet.setSelected(false)
-            
-        if selectedPlanet != null
-            selectedPlanet.setSelected(true)
-            @selectedPlanet = selectedPlanet
+
+        if selectedPlanet == null
+            @setSource(null)
+            @setDestination(null)
+        
+        else
+            if @selectedSource
+                @setDestination(selectedPlanet)
+                @deployFleet()
+            else if !@selectedSource && !@selectedDestination
+                if selectedPlanet.owner == @player
+                    @setSource(selectedPlanet)
 
         for handler in @eventHandlers["click"]
             handler(e)
+
+    deployFleet:() ->
+        @fleets.push(new Fleet(@selectedSource, @selectedDestination, 100, 5))
+        @setSource(null)
+        @setDestination(null)
 
     addHandler:(eventName, func) ->
         @eventHandlers[eventName].push(func)
@@ -150,6 +182,7 @@ class GameCls
                 fleet.render()
             else
                 @fleets.splice(fi, 1)
+                fleet.planetTo.handleFleetCollision(fleet)
             fi++
 
         window.requestAnimationFrame(@renderLoop.bind(this))

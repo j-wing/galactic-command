@@ -1,5 +1,5 @@
-DEFAULT_PLANET_COLOR = "white"
-SELECTED_COLOR = "yellow"
+DEFAULT_PLANET_COLOR = "#EEE"
+SELECTED_COLOR = "#00FFFF"
 PLANET_SIZES = 
     1: 15
     2: 25
@@ -25,6 +25,7 @@ class Planet
             # @ctx.stroke
             @ctx.shadowBlur = 100
             @ctx.shadowColor = SELECTED_COLOR
+            @ctx.lineWidth = 4
             utilities.strokeCircle(@x, @y, @radius+4, SELECTED_COLOR)
 
 
@@ -72,5 +73,16 @@ class Planet
             if !collided
                 break
         return [x, y]
+
+    handleFleetCollision:(fleet) ->
+        if fleet.owner == @owner
+            # Reinforcements
+            @numShips += fleet.numShips
+        else
+            remainingShips = fleet.numShips * fleet.planetFrom.killRate - @numShips*@killRate
+            if remainingShips > 0
+                @owner = fleet.owner
+                @numShips = remainingShips
+
 
 window.Planet = Planet
