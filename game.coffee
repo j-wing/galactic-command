@@ -72,9 +72,9 @@ class GameCls
     addEvents:() ->
         $(window).resize(@handleResize.bind(this))
         $(document).click(@handleClick.bind(this))
+        $(document).mousemove(@handleMouseMove.bind(this))
         # $(document).mousedown(@handleMouseDown.bind(this))
         # $(document).mouseup(@handleMouseUp.bind(this))
-        # $(document).mousemove(@handleMouseMove.bind(this))
 
     # shootContinuously: () ->
     #     if (@shooting)
@@ -91,11 +91,8 @@ class GameCls
     # handleMouseMove: (e) ->
     #     @cursorPosition = [e.clientX, e.clientY]
 
-    # handleMouseDown: (e) ->
-    #     @shooting = true
-    #     setTimeout((() =>
-    #         @shootContinuously(e)
-    #     ), 100)
+    handleMouseMove: (e) ->
+        hoverPlanet = @mouseOnPlanet(e)
 
     # handleMouseUp:(e) ->
     #     @shooting = false
@@ -114,13 +111,14 @@ class GameCls
             planet.setSelected(true)
         @selectedDestination = planet
 
-
-    handleClick:(e) ->
-        selectedPlanet = null
+    mouseOnPlanet:(e) ->
         for planet in @planets
             if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
-                selectedPlanet = planet
-                break
+                return planet
+        return null
+# 
+    handleClick:(e) ->
+        selectedPlanet = @mouseOnPlanet(e)
 
         if selectedPlanet == null
             @setSource(null)
