@@ -30,3 +30,19 @@
 #countdown.lessThan10{
 	color: red;
 }
+
+#gameover {
+	height:100%;
+	width:100%;
+	position:absolute;
+	top:0;
+	left:0;
+	padding-top:25%;
+	z-index:1000;
+	background-color:black;
+	color:white;
+	font-size:5em;
+	font-family:helvetica;
+	text-align:center;
+	display:none;
+}
