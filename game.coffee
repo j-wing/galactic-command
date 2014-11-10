@@ -2,12 +2,10 @@ class Player
     constructor:(@number, @isHuman) ->
 
     getPlanetColor:() ->
-        return "#3CB400"
+        return "red"
 
     getShipColor:() ->
-        if @isHuman
-            return "#00FF04"
-
+        return "white"
 class AI extends Player
     constructor:(@number, @isHuman=false) ->
         @numShips = 100
@@ -19,10 +17,15 @@ class AI extends Player
         return "red"
 
 BASE_NEUTRAL_PLANETS = 5
+
+#Planning time duration in seconds
+PLANNING_DURATION = 5
+INTERACTIVE_DURATION = 5
 # States of the game:
 # 0: Initializing.
 # 1: Planning phase.
 # 2: Interactive phase
+# 3: AI Phase
 
 class GameCls
     constructor:() ->
@@ -34,6 +37,7 @@ class GameCls
         @bg.src = "bg.jpg"
 
         @currentState = 0
+        @countdownRemaining = PLANNING_DURATION
 
         # List of all event handlers.
         # Other objects looking to add hooks to DOM events need
@@ -46,22 +50,20 @@ class GameCls
 
     startRenderLoop:() ->
         @player = new Player(1, true)
-        @ai_players = []
-        @ai_players.push(new AI(2))
-        @ai_planets = []
 
         @generateDefaultPlanetSet()
         @selectedSource = null
         @selectedDestination = null
         @missiles = []
         @fleets = []
+        @planningLines = []
 
 
         window.requestAnimationFrame(@renderLoop.bind(@));
 
     generateDefaultPlanetSet: () ->
         # Generate a home planet for the user
-        homePlanet = new Planet(0, 0, 4)
+        homePlanet = new Planet(0, 0, 4, 20)
         homePlanet.setOwner(@player)
         homePlanet.setLocation(homePlanet.chooseRandomCoords(false)...)
         @planets = [homePlanet]
@@ -125,13 +127,12 @@ class GameCls
             planet.setSelected(true)
         @selectedDestination = planet
 
-
     mouseOnPlanet:(e) ->
         for planet in @planets
             if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
                 return planet
         return null
-#
+
     handleClick:(e) ->
         selectedPlanet = @mouseOnPlanet(e)
 
@@ -142,9 +143,6 @@ class GameCls
         else
             if @selectedSource
                 @setDestination(selectedPlanet)
-                console.log(@selectedSource.x, @selectedSource.y, @selectedDestination.x, @selectedDestination.y)
-                utilities.drawLine("white", @selectedSource.x, @selectedSource.y,
-                    @selectedDestination.x, @selectedDestination.y)
                 @deployFleet()
             else if !@selectedSource && !@selectedDestination
                 if selectedPlanet.owner == @player
@@ -155,32 +153,13 @@ class GameCls
 
     deployFleet:() ->
         if @selectedSource.numShips > 0
-            shipsToSend = Math.floor(@selectedSource.numShips)
+            shipsToSend = Math.floor(@selectedSource.numShips/2)
             @fleets.push(new Fleet(@selectedSource, @selectedDestination, shipsToSend, 5))
+            if @currentState == 1
+                @planningLines.push([@selectedSource, @selectedDestination])
             @selectedSource.sendShips(shipsToSend)
         @setSource(null)
         @setDestination(null)
-
-    deployFleetAI:() ->
-        neutralPlanets = @getNeutralPlanets()
-        if @ai_player.numShips >= 0
-            index = utilities.randInt(0, neutralPlanets.length - 1)
-            @fleets.push(new Fleet(@ai_starting_planet))
-
-    getNeutralPlanets:() ->
-        neutralPlanets = []
-        for planet in @planets
-            if !planet.owner
-                neutralPlanets.push(planet)
-        return neutralPlanets
-
-    getLeastShipsPlanet:() ->
-        min_planet = undefined
-        min_ships = 999
-        for planet in @planets
-            if planet.owner && planet.owner.isHuman && planet.numShips < min_ships
-                min_planet = planet
-        return min_planet
 
     addHandler:(eventName, func) ->
         @eventHandlers[eventName].push(func)
@@ -190,44 +169,88 @@ class GameCls
         @canvasHeight = window.innerHeight
         @canvas.attr("width", @canvasWidth).attr("height", @canvasHeight)
 
+    beginPlanningPhase:() ->
+        @currentState = 1
+        for planet in @planets
+            planet.produceShips()
+        @countdownRemaining = PLANNING_DURATION
+        @countdown()
+
+    countdown:() ->
+        @countdownRemaining -= 1
+        elem = $("#countdown")
+        elem.text(@countdownRemaining)
+        if @countdownRemaining == 0
+            if @currentState == 1
+                @beginInteractivePhase()
+            else
+                @beginPlanningPhase()
+        else
+            if @countdownRemaining < 10
+                elem.addClass("lessThan10")
+            else
+                elem.removeClass("lessThan10")
+            setTimeout(@countdown.bind(this), 1000)
+
+    beginInteractivePhase:() ->
+        @currentState = 3
+        # for ai in @ai_players
+            # ai.takeTurn()
+        @currentState = 2
+        @countdownRemaining = INTERACTIVE_DURATION
+        @countdown()
+
     renderLoop:() ->
         @ctx.clearRect(0, 0, @canvasWidth, @canvasHeight)
+        if @currentState == 1
+            # Render planning lines
+            @ctx.strokeStyle = "cyan"
+            @ctx.lineWidth = 3
+            for [from, to] in @planningLines
+                @ctx.beginPath()
+                @ctx.moveTo(from.x, from.y)
+                @ctx.lineTo(to.x, to.y)
+                @ctx.stroke()
+
 
         for planet in @planets
             planet.render()
 
-        mi = 0
-        while mi < @missiles.length
-            missile = @missiles[mi]
-            pi = 0
-            collided = false
-            while pi < @planets.length
-                planet = @planets[pi]
-                # Collision detection for missiles and planets
-                if utilities.euclideanDistance(missile.x, missile.y, planet.x, planet.y) < planet.radius and planet != @planets[0]
-                    @planets.splice(pi, 1)
-                    collided = true
-                    break
-                pi++
-            if collided
-                @missiles.splice(mi, 1)
-            else
-                missile.render()
-            mi++
-
-        fi = 0
-        while fi < @fleets.length
-            fleet = @fleets[fi]
-            if !fleet.hasCollided()
-                fleet.render()
-            else
-                @fleets.splice(fi, 1)
-                fleet.planetTo.handleFleetCollision(fleet)
-            fi++
-
-        #### HANDLE AI ####
+        # mi = 0
+        # while mi < @missiles.length
+        #     missile = @missiles[mi]
+        #     pi = 0
+        #     collided = false
+        #     while pi < @planets.length
+        #         planet = @planets[pi]
+        #         # Collision detection for missiles and planets
+        #         if utilities.euclideanDistance(missile.x, missile.y, planet.x, planet.y) < planet.radius and planet != @planets[0]
+        #             @planets.splice(pi, 1)
+        #             collided = true
+        #             break
+        #         pi++
+        #     if collided
+        #         @missiles.splice(mi, 1)
+        #     else
+        #         missile.render()
+        #     mi++
 
 
+        if @currentState == 2
+            @planningLines = []
+
+            fi = 0
+            while fi < @fleets.length
+                fleet = @fleets[fi]
+                if !fleet.hasCollided()
+                    fleet.render()
+                else
+                    @fleets.splice(fi, 1)
+                    fleet.planetTo.handleFleetCollision(fleet)
+                fi++
+
+        if @currentState == 0
+            @beginPlanningPhase()
         window.requestAnimationFrame(@renderLoop.bind(this))
 
 $(document).ready(() ->

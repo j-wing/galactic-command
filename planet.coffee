@@ -8,11 +8,11 @@ PLANET_SIZES =
 
 class Planet
     # Base class for planets
-    constructor:(@x, @y, @size) ->
+    constructor:(@x, @y, @size, numShips=-1) ->
         @radius = @chooseRadius()
         @owner = null
         @ctx = Game.getContext()
-        @numShips = @chooseDefaultShips()
+        @numShips = if numShips < 0 then @chooseDefaultShips() else numShips
         @killRate = @chooseDefaultKillRate()
         @selected = false
 
@@ -40,7 +40,7 @@ class Planet
 
     chooseDefaultShips:() ->
         # Returns a number of ships suitable as a default, as a random number from 1-15
-        return 1 + Math.round(Math.random()*14)
+        return 1 + Math.round(Math.random()*10)
 
     chooseDefaultKillRate:() ->
         # Chooses a default kill rate as random number between .3 and .8
@@ -90,6 +90,9 @@ class Planet
 
     sendShips:(num) ->
         @numShips -= num
+
+    produceShips:() ->
+        @numShips += utilities.randInt(2, 10)
 
 
 window.Planet = Planet
