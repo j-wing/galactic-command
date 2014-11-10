@@ -47,7 +47,7 @@ BASE_NEUTRAL_PLANETS = 5
 
 #Planning time duration in seconds
 PLANNING_DURATION = 10
-INTERACTIVE_DURATION = 20
+INTERACTIVE_DURATION = 13
 # States of the game:
 # 0: Initializing.
 # 1: Planning phase.
@@ -101,7 +101,7 @@ class GameCls
         homePlanet.setLocation(homePlanet.chooseRandomCoords(false)...)
         @planets = [homePlanet]
 
-        aiPlanet = new Planet(0, 0, 4, 1)
+        aiPlanet = new Planet(0, 0, 4, 25)
         aiPlanet.setOwner(@aiPlayers[0])
         aiPlanet.setLocation(aiPlanet.chooseRandomCoords()...)
         @planets.push(aiPlanet)
@@ -239,7 +239,7 @@ class GameCls
             else
                 @beginPlanningPhase()
         else
-            if @countdownRemaining < 10
+            if @countdownRemaining < 6
                 elem.addClass("lessThan10")
             else
                 elem.removeClass("lessThan10")

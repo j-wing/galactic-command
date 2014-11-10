@@ -84,7 +84,7 @@ class Planet
             remainingShips = Math.round(fleet.numShips * fleet.planetFrom.killRate * attackerRand - @numShips*@killRate*defenderRand)
             if remainingShips > 0
                 index = Game.aiPlayers.indexOf(@owner)
-                if @owner == Game.player
+                if @owner == Game.player || (@owner == null && fleet.owner != Game.player)
                     Game.aiPlanets.push(@)
                 else if index != -1
                     Game.aiPlanets.splice(index, 1)
@@ -98,7 +98,7 @@ class Planet
 
     produceShips:() ->
         if @owner == null
-            @numShips += utilities.randInt(2, 4)
+            @numShips += utilities.randInt(1, 3)
         else
             @numShips += utilities.randInt(2, 10)
 
