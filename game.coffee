@@ -2,10 +2,11 @@ class Player
     constructor:(@number, @isHuman) ->
 
     getPlanetColor:() ->
-        return "red"
+        return "#3CB400"
 
     getShipColor:() ->
-        return "white"
+        return "#3CB400"
+
 class AI extends Player
     constructor:(@number, @isHuman=false) ->
         @numShips = 100
@@ -15,6 +16,9 @@ class AI extends Player
 
     getShipColor:() ->
         return "red"
+
+    takeTurn:() ->
+
 
 BASE_NEUTRAL_PLANETS = 5
 
@@ -50,6 +54,7 @@ class GameCls
 
     startRenderLoop:() ->
         @player = new Player(1, true)
+        @aiPlayers = [new AI(2, false)]
 
         @generateDefaultPlanetSet()
         @selectedSource = null
@@ -67,6 +72,11 @@ class GameCls
         homePlanet.setOwner(@player)
         homePlanet.setLocation(homePlanet.chooseRandomCoords(false)...)
         @planets = [homePlanet]
+
+        aiPlanet = new Planet(0, 0, 4, 20)
+        aiPlanet.setOwner(@aiPlayers[0])
+        aiPlanet.setLocation(aiPlanet.chooseRandomCoords()...)
+        @planets.push(aiPlanet)
 
         # Now generate the neutral planets
         numPlanets = utilities.randInt(BASE_NEUTRAL_PLANETS, BASE_NEUTRAL_PLANETS+6)
@@ -194,8 +204,8 @@ class GameCls
 
     beginInteractivePhase:() ->
         @currentState = 3
-        # for ai in @ai_players
-            # ai.takeTurn()
+        for ai in @aiPlayers
+            ai.takeTurn()
         @currentState = 2
         @countdownRemaining = INTERACTIVE_DURATION
         @countdown()
