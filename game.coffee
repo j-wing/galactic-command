@@ -59,10 +59,6 @@ class GameCls
             planet = new Planet(0, 0, utilities.randInt(1, 3))
             planet.setLocation(planet.chooseRandomCoords()...)
 
-            # FOR DEBUGGING
-            if Math.round(Math.random()) == 0
-                planet.setOwner(@player)
-
             @planets.push(planet)
             i++
 
