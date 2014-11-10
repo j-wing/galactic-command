@@ -9,7 +9,7 @@ class Player
 
 class AI extends Player
     constructor:(@number, @isHuman=false) ->
-        @numShips = 100
+        # @numShips = 100
 
     getPlanetColor:() ->
         return "red"
@@ -18,6 +18,29 @@ class AI extends Player
         return "red"
 
     takeTurn:() ->
+        if !Game.aiPlanets.length
+            return
+        max = Game.aiPlanets[0]
+        i = 0
+        while i < Game.aiPlanets.length
+            if Game.aiPlanets[i].numShips > max.numShips
+                max = Game.aiPlanets[i]
+            i++
+
+        i = 0
+        target = null
+        while i < Game.planets.length
+            p = Game.planets[i]
+            if p.owner != @ && (!target || (p.numShips < target.numShips))
+                target = p
+            i++
+
+        if target.numShips <= max.numShips/2
+            Game.selectedSource = max
+            Game.selectedDestination = target
+            Game.deployFleet()
+
+
 
 
 BASE_NEUTRAL_PLANETS = 5
@@ -30,6 +53,7 @@ INTERACTIVE_DURATION = 5
 # 1: Planning phase.
 # 2: Interactive phase
 # 3: AI Phase
+# 4: Game over
 
 class GameCls
     constructor:() ->
@@ -55,6 +79,9 @@ class GameCls
     startRenderLoop:() ->
         @player = new Player(1, true)
         @aiPlayers = [new AI(2, false)]
+        
+        @planets = []
+        @aiPlanets = []
 
         @generateDefaultPlanetSet()
         @selectedSource = null
@@ -64,19 +91,21 @@ class GameCls
         @planningLines = []
 
 
+
         window.requestAnimationFrame(@renderLoop.bind(@));
 
     generateDefaultPlanetSet: () ->
         # Generate a home planet for the user
-        homePlanet = new Planet(0, 0, 4, 20)
+        homePlanet = new Planet(0, 0, 4, 40)
         homePlanet.setOwner(@player)
         homePlanet.setLocation(homePlanet.chooseRandomCoords(false)...)
         @planets = [homePlanet]
 
-        aiPlanet = new Planet(0, 0, 4, 20)
+        aiPlanet = new Planet(0, 0, 4, 1)
         aiPlanet.setOwner(@aiPlayers[0])
         aiPlanet.setLocation(aiPlanet.chooseRandomCoords()...)
         @planets.push(aiPlanet)
+        @aiPlanets.push(aiPlanet)
 
         # Now generate the neutral planets
         numPlanets = utilities.randInt(BASE_NEUTRAL_PLANETS, BASE_NEUTRAL_PLANETS+6)
@@ -162,6 +191,7 @@ class GameCls
             handler(e)
 
     deployFleet:() ->
+        console.log(@selectedSource, @selectedDestination)
         if @selectedSource.numShips > 0
             shipsToSend = Math.floor(@selectedSource.numShips/2)
             @fleets.push(new Fleet(@selectedSource, @selectedDestination, shipsToSend, 5))
@@ -180,6 +210,10 @@ class GameCls
         @canvas.attr("width", @canvasWidth).attr("height", @canvasHeight)
 
     beginPlanningPhase:() ->
+        if @aiPlanets.length == 0
+            @currentState = 4
+            return
+
         @currentState = 1
         for planet in @planets
             planet.produceShips()
@@ -222,6 +256,8 @@ class GameCls
                 @ctx.lineTo(to.x, to.y)
                 @ctx.stroke()
 
+        if @currentState == 4
+            $("#gameover").css("display","block")
 
         for planet in @planets
             planet.render()
