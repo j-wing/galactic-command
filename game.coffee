@@ -46,8 +46,8 @@ class AI extends Player
 BASE_NEUTRAL_PLANETS = 5
 
 #Planning time duration in seconds
-PLANNING_DURATION = 5
-INTERACTIVE_DURATION = 5
+PLANNING_DURATION = 10
+INTERACTIVE_DURATION = 20
 # States of the game:
 # 0: Initializing.
 # 1: Planning phase.
@@ -211,6 +211,15 @@ class GameCls
 
     beginPlanningPhase:() ->
         if @aiPlanets.length == 0
+            $("#youwon").css("display", "block")
+            @currentState = 4
+            return
+
+        foundPlayer = false
+        for planet in @planets
+            if planet.owner == @player
+                foundPlayer = true
+        if !foundPlayer
             @currentState = 4
             return
 
