@@ -2,10 +2,21 @@ class Player
     constructor:(@number, @isHuman) ->
 
     getPlanetColor:() ->
+        return "#3CB400"
+
+    getShipColor:() ->
+        if @isHuman
+            return "#00FF04"
+
+class AI extends Player
+    constructor:(@number, @isHuman=false) ->
+        @numShips = 100
+
+    getPlanetColor:() ->
         return "red"
 
     getShipColor:() ->
-        return "white"
+        return "red"
 
 BASE_NEUTRAL_PLANETS = 5
 # States of the game:
@@ -35,6 +46,9 @@ class GameCls
 
     startRenderLoop:() ->
         @player = new Player(1, true)
+        @ai_players = []
+        @ai_players.push(new AI(2))
+        @ai_planets = []
 
         @generateDefaultPlanetSet()
         @selectedSource = null
@@ -115,6 +129,7 @@ class GameCls
             planet.setSelected(true)
         @selectedDestination = planet
 
+
     mouseOnPlanet:(e) ->
         for planet in @planets
             if utilities.euclideanDistance(planet.x, planet.y, e.clientX, e.clientY) < planet.radius
@@ -131,6 +146,9 @@ class GameCls
         else
             if @selectedSource
                 @setDestination(selectedPlanet)
+                console.log(@selectedSource.x, @selectedSource.y, @selectedDestination.x, @selectedDestination.y)
+                utilities.drawLine("white", @selectedSource.x, @selectedSource.y,
+                    @selectedDestination.x, @selectedDestination.y)
                 @deployFleet()
             else if !@selectedSource && !@selectedDestination
                 if selectedPlanet.owner == @player
@@ -146,6 +164,27 @@ class GameCls
             @selectedSource.sendShips(shipsToSend)
         @setSource(null)
         @setDestination(null)
+
+    deployFleetAI:() ->
+        neutralPlanets = @getNeutralPlanets()
+        if @ai_player.numShips >= 0
+            index = utilities.randInt(0, neutralPlanets.length - 1)
+            @fleets.push(new Fleet(@ai_starting_planet))
+
+    getNeutralPlanets:() ->
+        neutralPlanets = []
+        for planet in @planets
+            if !planet.owner
+                neutralPlanets.push(planet)
+        return neutralPlanets
+
+    getLeastShipsPlanet:() ->
+        min_planet = undefined
+        min_ships = 999
+        for planet in @planets
+            if planet.owner && planet.owner.isHuman && planet.numShips < min_ships
+                min_planet = planet
+        return min_planet
 
     addHandler:(eventName, func) ->
         @eventHandlers[eventName].push(func)
@@ -189,6 +228,9 @@ class GameCls
                 @fleets.splice(fi, 1)
                 fleet.planetTo.handleFleetCollision(fleet)
             fi++
+
+        #### HANDLE AI ####
+
 
         window.requestAnimationFrame(@renderLoop.bind(this))
 

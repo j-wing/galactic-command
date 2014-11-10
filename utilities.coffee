@@ -24,8 +24,7 @@ class Utilities
 			@ctx.fill();
 
 	drawLine: (color, tx, ty, fx, fy)->
-		@ctx.strokeStyle = color
-		@ctx.lineWidth = 1
+		@ctx.strokeStyle = "white"
 		@ctx.beginPath()
 		@ctx.moveTo(tx, ty)
 		@ctx.lineTo(fx, fy)
@@ -65,7 +64,7 @@ class Utilities
 
 	randInt:(low, high) ->
 		@rand(low, high, true)
-	
+
 	randDouble: (low, high) ->
 		@rand(low, high, false)
 

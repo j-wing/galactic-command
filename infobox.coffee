@@ -23,7 +23,7 @@ class InfoBox
 		else if @planet.owner.isHuman
 			ownerText = "You"
 		else
-			ownerText = "AI-" + @planet.owner.number
+			ownerText = "AI-" + @planet.owner.number - 1
 		$("#owner").html(ownerText)
 
 		# Set num ships
